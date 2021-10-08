@@ -1,0 +1,10 @@
+{
+    "core": "WordPress/WordPress",
+    "config": {},
+    "plugins": [],
+    "themes": [],
+    "mappings": {
+        "wp-content/mu-plugins": "./web/app/mu-plugins",
+        "wp-content/plugins": "./web/app/plugins"
+    }
+}

@@ -1,0 +1,59 @@
+version: '3.8'
+services:
+    db:
+        container_name: db.muhit.me
+        image: mysql
+        restart: always
+        env_file:
+            - ./etc/mysql/.docker.env
+        volumes:
+            - ./data/db/mysql:/var/lib/mysql
+            
+    phpmyadmin:
+        container_name: phpmyadmin.muhit.me
+        image: phpmyadmin/phpmyadmin
+        restart: always
+        depends_on:
+            - db
+        environment:
+            PMA_HOST: db
+            PMA_PORT: 3306
+            PMA_ARBITRARY: 1
+        ports:
+            - 8081:80
+
+    composer:
+        container_name: composer.muhit.me
+        image: composer
+        command: composer update
+        volumes:
+            - ./src:/app
+
+    web:
+        container_name: local.muhit.me
+        image: iammuhit/wordpress-bedrock
+        build:
+            context: ./etc/php/apache
+            dockerfile: Dockerfile
+        depends_on:
+            - composer
+            - db
+        volumes:
+            - ./src:/var/www
+        environment:
+            WORDPRESS_DB_NAME: wordpress
+            WORDPRESS_DB_USER: my-user
+            WORDPRESS_DB_PASSWORD: my-pass
+            WORDPRESS_DB_HOST: db.muhit.me
+            WORDPRESS_DB_PREFIX: wp_
+            WORDPRESS_ENV: development
+            WORDPRESS_HOME: http://local.muhit.me
+            WORDPRESS_SITEURL: http://local.muhit.me/wp
+        ports:
+            - 80:80
+            # - 443:443
+        extra_hosts:
+            - local.muhit.me:127.0.0.1
+
+networks:
+    backend:

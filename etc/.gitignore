@@ -1,0 +1,3 @@
+# SSL Certificate
+httpd/ssl/*.crt
+httpd/ssl/*.key
