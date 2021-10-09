@@ -23,7 +23,7 @@ while(!feof($docker_env)) {
 
 	if(sizeof($env_segments) >= 2) {
 		$env_name = trim($env_segments[0]);
-		$env_value = trim(str_replace('\'', '', $env_segments[1]));
+		$env_value = trim(str_replace(['\'', '"'], '', $env_segments[1]));
 
 		if(preg_match('/^#/', $env_name)) {
 			$env_name_uncomment = trim(preg_replace('/^#\s+/', '', $env_name));
@@ -31,7 +31,7 @@ while(!feof($docker_env)) {
 		}
 
 		$env_value = getenv_docker($env_name, $env_value);
-		$bedrock_env = str_replace($env_line, "{$env_name}='{$env_value}'\n", $bedrock_env);
+		$bedrock_env = str_replace($env_line, "{$env_name}=\"{$env_value}\"\n", $bedrock_env);
 	}
 }
 
