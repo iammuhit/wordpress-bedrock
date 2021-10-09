@@ -71,14 +71,14 @@ if [[ "$1" == apache2* ]] || [ "$1" = 'php-fpm' ]; then
 		echo >&2 "Complete! Bedrock has been successfully copied to $PWD"
     fi
 
-    wpEnvs=( "${!WORDPRESS_@}" )
-	if [ ! -s .env.local ] && [ "${#wpEnvs[@]}" -gt 0 ]; then
+    wpEnvs=( "${!WP_@}" )
+	if [ -s web/wp-config-docker.php ] && [ "${#wpEnvs[@]}" -gt 0 ]; then
         for wpConfigDocker in \
-            .docker.env \
-			/usr/src/bedrock/.docker.env \
+            .env.example \
+			/usr/src/bedrock/.env.example \
 		; do
 			if [ -s "$wpConfigDocker" ]; then
-				echo >&2 "No '.env.local' found in $PWD, but 'WORDPRESS_...' variables supplied; copying '$wpConfigDocker' (${wpEnvs[*]})"
+				echo >&2 "No '.env.local' found in $PWD, but 'WP_...' variables supplied; copying '$wpConfigDocker' (${wpEnvs[*]})"
 				# using "awk" to replace all instances of "generateme" with a properly unique string (for AUTH_KEY and friends to have safe defaults if they aren't specified with environment variables)
 				awk '
 					/generateme/ {
@@ -88,16 +88,19 @@ if [[ "$1" == apache2* ]] || [ "$1" = 'php-fpm' ]; then
 						gsub("generateme", str)
 					}
 					{ print }
-				' "$wpConfigDocker" > .env.local
+				' "$wpConfigDocker" > .env
 
 				if [ "$uid" = '0' ]; then
-					# attempt to ensure that .env.local is owned by the run user
+					# attempt to ensure that .env is owned by the run user
 					# could be on a filesystem that doesn't allow chown (like some NFS setups)
-					chown "$user:$group" .env.local || true
+					chown "$user:$group" .env || true
 				fi
 				break
 			fi
 		done
+
+		# Update .env with Docker Environment
+		php web/wp-config-docker.php
 	fi
 fi
 

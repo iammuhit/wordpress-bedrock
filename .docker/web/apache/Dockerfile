@@ -145,7 +145,7 @@ RUN set -eux; \
 
 VOLUME /var/www
 
-COPY --chown=www-data:www-data .docker.env /usr/src/bedrock/
+COPY --chown=www-data:www-data .wp-docker.env /usr/src/bedrock/
 COPY --chown=www-data:www-data .wp-env.json /usr/src/bedrock/
 COPY --chown=www-data:www-data wp-config-docker.php /usr/src/bedrock/web/
 COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/

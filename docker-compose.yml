@@ -5,9 +5,9 @@ services:
         image: mysql
         restart: always
         env_file:
-            - ./etc/mysql/.docker.env
+            - ./.docker/mysql/my.env
         volumes:
-            - ./data/db/mysql:/var/lib/mysql
+            - db:/var/lib/mysql
             
     phpmyadmin:
         container_name: phpmyadmin.muhit.me
@@ -27,33 +27,30 @@ services:
         image: composer
         command: composer update
         volumes:
-            - ./src:/app
+            - bedrock:/app
 
     web:
         container_name: local.muhit.me
         image: iammuhit/wordpress-bedrock
+        restart: always
         build:
-            context: ./etc/php/apache
+            context: ./.docker/web/apache
             dockerfile: Dockerfile
         depends_on:
             - composer
             - db
+        env_file:
+            - ./.docker/web/apache/.wp-docker.env
         volumes:
-            - ./src:/var/www
-        environment:
-            WORDPRESS_DB_NAME: wordpress
-            WORDPRESS_DB_USER: my-user
-            WORDPRESS_DB_PASSWORD: my-pass
-            WORDPRESS_DB_HOST: db.muhit.me
-            WORDPRESS_DB_PREFIX: wp_
-            WORDPRESS_ENV: development
-            WORDPRESS_HOME: http://local.muhit.me
-            WORDPRESS_SITEURL: http://local.muhit.me/wp
+            - bedrock:/var/www
         ports:
             - 80:80
-            # - 443:443
         extra_hosts:
             - local.muhit.me:127.0.0.1
 
 networks:
     backend:
+
+volumes:
+    bedrock:
+    db:

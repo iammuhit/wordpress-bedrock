@@ -1,7 +1,3 @@
-# Bedrock Application
-src/*
-!src/.env.example
-
 # globs
 Makefile.in
 *.userprefs
