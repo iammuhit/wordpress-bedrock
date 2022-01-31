@@ -10,7 +10,7 @@ WORKDIR /var/www
 # Persistent Dependencies
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y curl zip git; \
+    apt-get install -y curl zip sendmail git; \
     rm -rf /var/lib/apt/lists/*
 
 # Node Development Tools
@@ -149,6 +149,11 @@ COPY --chown=www-data:www-data .wp-docker.env /usr/src/bedrock/
 COPY --chown=www-data:www-data .wp-env.json /usr/src/bedrock/
 COPY --chown=www-data:www-data wp-config-docker.php /usr/src/bedrock/web/
 COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/
+
+# Configure Sendmail
+RUN echo "sendmail_path=/usr/sbin/sendmail -t -i" >> /usr/local/etc/php/conf.d/sendmail.ini
+RUN sed -i '/#!\/bin\/sh/aservice sendmail restart' /usr/local/bin/docker-php-entrypoint
+RUN sed -i '/#!\/bin\/sh/aecho "$(hostname -i)\t$(hostname) $(hostname).localhost" >> /etc/hosts' /usr/local/bin/docker-php-entrypoint
 
 # Configure Apache
 ENV APACHE_DOCUMENT_ROOT=/var/www/web
