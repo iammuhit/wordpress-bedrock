@@ -22,11 +22,11 @@ RUN . ${NVM_DIR}/nvm.sh && nvm use --lts
 RUN . ${NVM_DIR}/nvm.sh && nvm alias default lts/*
 ENV PATH="$NVM_BIN:$PATH"
 
+# WP Command-line Interface
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 RUN chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp
-
-RUN echo "alias wp='wp --allow-root'" >> ~/.bashrc
 RUN wp --allow-root package install aaemnnosttv/wp-cli-dotenv-command:^2.0
+RUN echo "alias wp='wp --allow-root'" >> ~/.bashrc
 
 # PHP Extensions
 # Wordpress Requirements: https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions
