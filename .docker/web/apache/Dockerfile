@@ -11,6 +11,7 @@ WORKDIR /var/www
 RUN set -eux; \
     apt-get update; \
     apt-get install -y curl zip sendmail git; \
+    apt-get install -y gettext-base; \
     rm -rf /var/lib/apt/lists/*
 
 # Node Development Tools
