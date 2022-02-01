@@ -1,7 +1,8 @@
 FROM composer:latest as builder
 
 RUN set -eux; \
-    composer create-project roots/bedrock /app
+    composer create-project roots/bedrock /app; \
+    rm -f /app/.env
 
 FROM php:8.0-apache
 
@@ -149,9 +150,8 @@ RUN set -eux; \
 
 VOLUME /var/www
 
-COPY --chown=www-data:www-data .wp-docker.env /usr/src/bedrock/
+COPY --chown=www-data:www-data .env.example /usr/src/bedrock/
 COPY --chown=www-data:www-data .wp-env.json /usr/src/bedrock/
-COPY --chown=www-data:www-data wp-config-docker.php /usr/src/bedrock/web/
 COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/
 
 # Configure Sendmail

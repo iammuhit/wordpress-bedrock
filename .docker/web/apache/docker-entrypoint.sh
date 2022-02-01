@@ -72,23 +72,20 @@ if [[ "$1" == apache2* ]] || [ "$1" = 'php-fpm' ]; then
     fi
 
     wpEnvs=( "${!WP_@}" )
-	if [ -s web/wp-config-docker.php ] && [ "${#wpEnvs[@]}" -gt 0 ]; then
+	wpAdminEnvs=( "${!WP_ADMIN_@}" )
+
+	if [ ! -s .env ] && [ "${#wpEnvs[@]}" -gt 0 ]; then
         for wpConfigDocker in \
             .env.example \
 			/usr/src/bedrock/.env.example \
 		; do
 			if [ -s "$wpConfigDocker" ]; then
-				echo >&2 "No '.env.local' found in $PWD, but 'WP_...' variables supplied; copying '$wpConfigDocker' (${wpEnvs[*]})"
-				# using "awk" to replace all instances of "generateme" with a properly unique string (for AUTH_KEY and friends to have safe defaults if they aren't specified with environment variables)
-				awk '
-					/generateme/ {
-						cmd = "head -c1m /dev/urandom | sha1sum | cut -d\\  -f1"
-						cmd | getline str
-						close(cmd)
-						gsub("generateme", str)
-					}
-					{ print }
-				' "$wpConfigDocker" > .env
+				echo >&2 "No '.env' found in $PWD, but 'WP_...' variables supplied; copying '$wpConfigDocker' (${wpEnvs[*]})"
+
+				envVariables="$(env | awk -F'=' '{printf("%s=\"%s\" ", $1, $2);}')";
+				envSubstitutes=$(echo -n "'"; env | cut -d'=' -f 1 | awk '{printf("${%s} ", $0);}'; echo -n "'";);
+
+				echo "$envVariables envsubst $envSubstitutes < $wpConfigDocker > .env" | sh
 
 				if [ "$uid" = '0' ]; then
 					# attempt to ensure that .env is owned by the run user
@@ -99,8 +96,13 @@ if [[ "$1" == apache2* ]] || [ "$1" = 'php-fpm' ]; then
 			fi
 		done
 
-		# Update .env with Docker Environment
-		php web/wp-config-docker.php
+		wp dotenv salts regenerate
+		# wp core install \
+		# 	--url=${WP_HOME} \
+		# 	--title=${WP_SITE_NAME} \
+		# 	--admin_user=${WP_ADMIN_USERNAME} \
+		# 	--admin_password=${WP_ADMIN_PASSWORD} \
+		# 	--admin_email=${WP_ADMIN_EMAIL}
 	fi
 fi
 
