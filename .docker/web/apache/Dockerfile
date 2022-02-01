@@ -14,12 +14,12 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*
 
 # Node Development Tools
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
-RUN . ${HOME}/.nvm/nvm.sh; \
-    nvm install --lts; \
-    nvm use --lts; \
-    nvm alias default lts/*
-ENV PATH="${PATH}:${NVM_BIN}"
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+ENV NVM_DIR=/root/.nvm
+RUN . ${NVM_DIR}/nvm.sh && nvm install --lts
+RUN . ${NVM_DIR}/nvm.sh && nvm use --lts
+RUN . ${NVM_DIR}/nvm.sh && nvm alias default lts/*
+ENV PATH="$NVM_BIN:$PATH"
 
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 RUN chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp
