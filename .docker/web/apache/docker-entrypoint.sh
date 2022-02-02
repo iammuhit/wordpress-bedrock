@@ -60,7 +60,7 @@ if [[ "$1" == apache2* ]] || [ "$1" = 'php-fpm' ]; then
 		; do
 			contentPath="${contentPath%/}"
 			[ -e "$contentPath" ] || continue
-			contentPath="${contentPath#/usr/src/bedrock/}" # "app/plugins/akismet", etc.
+			contentPath="${contentPath#/usr/src/bedrock/web}" # "app/plugins/akismet", etc.
 			if [ -e "$PWD/$contentPath" ]; then
 				echo >&2 "WARNING: '$PWD/$contentPath' exists! (not copying the Bedrock version)"
 				sourceTarArgs+=( --exclude "./$contentPath" )
@@ -92,17 +92,18 @@ if [[ "$1" == apache2* ]] || [ "$1" = 'php-fpm' ]; then
 					# could be on a filesystem that doesn't allow chown (like some NFS setups)
 					chown "$user:$group" .env || true
 				fi
+
+				wp dotenv salts regenerate
+				# wp core install \
+				# 	--url=${WP_HOME} \
+				# 	--title=${WP_SITE_NAME} \
+				# 	--admin_user=${WP_ADMIN_USERNAME} \
+				# 	--admin_password=${WP_ADMIN_PASSWORD} \
+				# 	--admin_email=${WP_ADMIN_EMAIL}
+				
 				break
 			fi
 		done
-
-		wp dotenv salts regenerate
-		# wp core install \
-		# 	--url=${WP_HOME} \
-		# 	--title=${WP_SITE_NAME} \
-		# 	--admin_user=${WP_ADMIN_USERNAME} \
-		# 	--admin_password=${WP_ADMIN_PASSWORD} \
-		# 	--admin_email=${WP_ADMIN_EMAIL}
 	fi
 fi
 
