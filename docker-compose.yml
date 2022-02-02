@@ -6,7 +6,7 @@ services:
         image: iammuhit/wordpress-bedrock
         restart: always
         build:
-            context: ./.docker/web/apache
+            context: ./.docker/apache
             dockerfile: Dockerfile
         depends_on:
             - db
@@ -27,7 +27,7 @@ services:
 
             WP_CLI_ALLOW_ROOT: true
         volumes:
-            - .:/var/www
+            - backend:/var/www
             - db:/var/www/data/db
             - client:/var/www/client
 
@@ -41,7 +41,7 @@ services:
             MYSQL_PASSWORD: ${DB_PASSWORD}
             MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
         volumes:
-            - ./data/db:/var/lib/mysql
+            - db:/var/lib/mysql
 
     phpmyadmin:
         container_name: phpmyadmin.muhit.me
