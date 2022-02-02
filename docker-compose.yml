@@ -1,14 +1,48 @@
-version: '3.8'
-services:
+version: '3.9' 
+
+services: 
+    web:
+        container_name: muhit.me
+        image: iammuhit/wordpress-bedrock
+        restart: always
+        build:
+            context: ./.docker/web/apache
+            dockerfile: Dockerfile
+        depends_on:
+            - db
+        ports:
+            - 80:80
+        environment:
+            DB_HOST: db.muhit.me
+            DB_NAME: exampledb
+            DB_USER: exampledb-user
+            DB_PASSWORD: exampledb-pass
+
+            WP_ENV: development
+            WP_HOME: http://local.muhit.me
+            WP_SITE_NAME: Wordpress
+            WP_ADMIN_USERNAME: mayarun
+            WP_ADMIN_PASSWORD: mayarun-pass
+            WP_ADMIN_EMAIL: example@mayarun.se
+
+            WP_CLI_ALLOW_ROOT: true
+        volumes:
+            - .:/var/www
+            - db:/var/www/data/db
+            - client:/var/www/client
+
     db:
         container_name: db.muhit.me
         image: mysql
         restart: always
-        env_file:
-            - ./.docker/mysql/my.env
+        environment:
+            MYSQL_DATABASE: exampledb
+            MYSQL_USER: exampledb-user
+            MYSQL_PASSWORD: exampledb-pass
+            MYSQL_ROOT_PASSWORD: root
         volumes:
-            - db:/var/lib/mysql
-            
+            - ./data/db:/var/lib/mysql
+
     phpmyadmin:
         container_name: phpmyadmin.muhit.me
         image: phpmyadmin/phpmyadmin
@@ -19,38 +53,11 @@ services:
             PMA_HOST: db
             PMA_PORT: 3306
             PMA_ARBITRARY: 1
+            UPLOAD_LIMIT: 1024M
         ports:
             - 8081:80
 
-    composer:
-        container_name: composer.muhit.me
-        image: composer
-        command: composer update
-        volumes:
-            - bedrock:/app
-
-    web:
-        container_name: local.muhit.me
-        image: iammuhit/wordpress-bedrock
-        restart: always
-        build:
-            context: ./.docker/web/apache
-            dockerfile: Dockerfile
-        depends_on:
-            - composer
-            - db
-        env_file:
-            - ./.docker/web/apache/.wp-docker.env
-        volumes:
-            - bedrock:/var/www
-        ports:
-            - 80:80
-        extra_hosts:
-            - local.muhit.me:127.0.0.1
-
-networks:
-    backend:
-
 volumes:
-    bedrock:
+    backend:
+    client:
     db:
