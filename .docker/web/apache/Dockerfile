@@ -149,6 +149,7 @@ RUN set -eux; \
 
 VOLUME /var/www
 
+COPY --chown=www-data:www-data .env.template /usr/src/bedrock/
 COPY --chown=www-data:www-data .env.example /usr/src/bedrock/
 COPY --chown=www-data:www-data .wp-env.json /usr/src/bedrock/
 COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/

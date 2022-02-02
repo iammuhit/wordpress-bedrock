@@ -76,8 +76,8 @@ if [[ "$1" == apache2* ]] || [ "$1" = 'php-fpm' ]; then
 
 	if [ ! -s .env ] && [ "${#wpEnvs[@]}" -gt 0 ]; then
         for wpConfigDocker in \
-            .env.example \
-			/usr/src/bedrock/.env.example \
+            .env.template \
+			/usr/src/bedrock/.env.template \
 		; do
 			if [ -s "$wpConfigDocker" ]; then
 				echo >&2 "No '.env' found in $PWD, but 'WP_...' variables supplied; copying '$wpConfigDocker' (${wpEnvs[*]})"
@@ -105,6 +105,9 @@ if [[ "$1" == apache2* ]] || [ "$1" = 'php-fpm' ]; then
 			fi
 		done
 	fi
+
+	# we don't need it anymore in apache's root folder
+	rm -f .env.template
 fi
 
 exec "$@"
