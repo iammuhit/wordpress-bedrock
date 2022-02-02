@@ -13,17 +13,17 @@ services:
         ports:
             - 80:80
         environment:
-            DB_HOST: db.muhit.me
-            DB_NAME: exampledb
-            DB_USER: exampledb-user
-            DB_PASSWORD: exampledb-pass
+            DB_HOST: ${DB_HOST}
+            DB_NAME: ${DB_NAME}
+            DB_USER: ${DB_USER}
+            DB_PASSWORD: ${DB_PASSWORD}
 
-            WP_ENV: development
-            WP_HOME: http://local.muhit.me
-            WP_SITE_NAME: Wordpress
-            WP_ADMIN_USERNAME: mayarun
-            WP_ADMIN_PASSWORD: mayarun-pass
-            WP_ADMIN_EMAIL: example@mayarun.se
+            WP_ENV: ${WP_ENV}
+            WP_HOME: ${WP_HOME}
+            WP_SITENAME: ${WP_SITENAME}
+            WP_ADMIN_USERNAME: ${WP_ADMIN_USERNAME}
+            WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD}
+            WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL}
 
             WP_CLI_ALLOW_ROOT: true
         volumes:
@@ -36,10 +36,10 @@ services:
         image: mysql
         restart: always
         environment:
-            MYSQL_DATABASE: exampledb
-            MYSQL_USER: exampledb-user
-            MYSQL_PASSWORD: exampledb-pass
-            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: ${DB_NAME}
+            MYSQL_USER: ${DB_USER}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
         volumes:
             - ./data/db:/var/lib/mysql
 
