@@ -45,6 +45,7 @@ services:
 
             WP_CLI_ALLOW_ROOT: ${WP_CLI_ALLOW_ROOT:-true}
             WP_GENERATE_SALTS: ${WP_GENERATE_SALTS:-true}
+            WP_CORE_INSTALL  : ${WP_CORE_INSTALL:-false}
         volumes:
             - backend:/var/www
             - db:/var/www/data/db

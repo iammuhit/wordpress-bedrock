@@ -103,7 +103,7 @@ if [[ "$1" == apache2* ]] || [ "$1" = 'php-fpm' ]; then
                     wp dotenv salts regenerate
                 fi
 
-                if [ ! -z "$WP_HOME" ] && [ ! -z "$WP_SITENAME" ] && [ ! -z "$WP_ADMIN_USERNAME" ] && [ ! -z "$WP_ADMIN_PASSWORD" ] && [ ! -z "$WP_ADMIN_EMAIL" ]; then
+                if [ "$WP_CORE_INSTALL" = 'true' ] && [ ! -z "$WP_HOME" ] && [ ! -z "$WP_SITENAME" ] && [ ! -z "$WP_ADMIN_USERNAME" ] && [ ! -z "$WP_ADMIN_PASSWORD" ] && [ ! -z "$WP_ADMIN_EMAIL" ]; then
                     wp core install \
                         --url="$WP_HOME" \
                         --title="$WP_SITENAME" \
