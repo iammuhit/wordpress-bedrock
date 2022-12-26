@@ -3,7 +3,9 @@ FROM composer:latest as builder
 RUN set -eux; \
     composer create-project roots/bedrock /app; \
     rm -f /app/.env
+COPY data /app/data
 
+# Base Image
 FROM php:8.0-apache
 
 WORKDIR /var/www
@@ -11,9 +13,14 @@ WORKDIR /var/www
 # Persistent Dependencies
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y curl zip sendmail git; \
+    apt-get install -y curl zip unzip sendmail git; \
     apt-get install -y gettext-base; \
     rm -rf /var/lib/apt/lists/*
+
+# Environment Variables
+ENV DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-root}
+ENV DB_HOST=${DB_PREFIX:-localhost}
+ENV DB_PREFIX=${DB_PREFIX:-wp_}
 
 # Node Development Tools
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
@@ -26,7 +33,7 @@ ENV PATH="$NVM_BIN:$PATH"
 # WP Command-line Interface
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 RUN chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp
-RUN wp --allow-root package install aaemnnosttv/wp-cli-dotenv-command:^2.0
+RUN wp --allow-root package install aaemnnosttv/wp-cli-dotenv-command:^2.1
 
 # PHP Extensions
 # Wordpress Requirements: https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions
@@ -152,6 +159,7 @@ VOLUME /var/www
 COPY --chown=www-data:www-data .env.template /usr/src/bedrock/
 COPY --chown=www-data:www-data .env.example /usr/src/bedrock/
 COPY --chown=www-data:www-data .wp-env.json /usr/src/bedrock/
+COPY --chown=www-data:www-data wp-config-docker.php /usr/src/bedrock/web
 COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/
 
 # Configure Sendmail

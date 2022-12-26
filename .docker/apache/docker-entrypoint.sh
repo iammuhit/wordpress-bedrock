@@ -82,10 +82,16 @@ if [[ "$1" == apache2* ]] || [ "$1" = 'php-fpm' ]; then
 			if [ -s "$wpConfigDocker" ]; then
 				echo >&2 "No '.env' found in $PWD, but 'WP_...' variables supplied; copying '$wpConfigDocker' (${wpEnvs[*]})"
 
-				envVariables="$(env | awk -F'=' '{printf("%s=\"%s\" ", $1, $2);}')";
-				envSubstitutes=$(echo -n "'"; env | cut -d'=' -f 1 | awk '{printf("${%s} ", $0);}'; echo -n "'";);
+				cat $wpConfigDocker | envsubst > .env | sh
 
-				echo "$envVariables envsubst $envSubstitutes < $wpConfigDocker > .env" | sh
+				# envVariables="$(env | awk -F'=' '{printf("%s=\"%s\" ", $1, $2);}')";
+				# envSubstitutes=$(echo -n "'"; env | cut -d'=' -f 1 | awk '{printf("${%s} ", $0);}'; echo -n "'";);
+
+				# echo "$envVariables envsubst $envSubstitutes < $wpConfigDocker > .env" | sh
+
+				# substitute environs
+				# php -r "copy('.env.example', '.env');"
+				# php -f "web/wp-config-docker.php"
 
 				if [ "$uid" = '0' ]; then
 					# attempt to ensure that .env is owned by the run user
@@ -93,20 +99,26 @@ if [[ "$1" == apache2* ]] || [ "$1" = 'php-fpm' ]; then
 					chown "$user:$group" .env || true
 				fi
 
-				wp dotenv salts regenerate
-				# wp core install \
-				# 	--url=${WP_HOME} \
-				# 	--title=${WP_SITE_NAME} \
-				# 	--admin_user=${WP_ADMIN_USERNAME} \
-				# 	--admin_password=${WP_ADMIN_PASSWORD} \
-				# 	--admin_email=${WP_ADMIN_EMAIL}
+				if [ "$WP_GENERATE_SALTS" = 'true' ]; then
+					wp dotenv salts regenerate
+				fi
+
+				if [ ! -z "$WP_HOME" ] && [ ! -z "$WP_SITENAME" ] && [ ! -z "$WP_ADMIN_USERNAME" ] && [ ! -z "$WP_ADMIN_PASSWORD" ] && [ ! -z "$WP_ADMIN_EMAIL" ]; then
+					wp core install \
+						--url="$WP_HOME" \
+						--title="$WP_SITENAME" \
+						--admin_user="$WP_ADMIN_USERNAME" \
+						--admin_password="$WP_ADMIN_PASSWORD" \
+						--admin_email="$WP_ADMIN_EMAIL"
+				fi
 				
 				break
 			fi
 		done
 	fi
 
-	# we don't need it anymore in apache's root folder
+	# we don't need them anymore in apache's root folder
+	rm -f web/wp-config-docker.php
 	rm -f .env.template
 fi
 

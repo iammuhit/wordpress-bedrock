@@ -1,63 +1,75 @@
 version: '3.9' 
 
-services: 
+services:
+    db:
+        container_name: ${DB_HOST:-db.muhit.me}
+        image: mysql
+        restart: always
+        environment:
+            MYSQL_DATABASE     : ${DB_NAME:-wordpress}
+            MYSQL_USER         : ${DB_USER:-maya-user}
+            MYSQL_PASSWORD     : ${DB_PASSWORD:-maya-pass}
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+        volumes:
+            - db:/var/lib/mysql
+
     web:
-        container_name: muhit.me
+        container_name: ${CONTAINER_NAME:-muhit.me}
         image: iammuhit/wordpress-bedrock
         restart: always
-        build:
-            context: ./.docker/apache
-            dockerfile: Dockerfile
         depends_on:
             - db
         ports:
             - 80:80
         environment:
-            DB_HOST: ${DB_HOST}
-            DB_NAME: ${DB_NAME}
-            DB_USER: ${DB_USER}
-            DB_PASSWORD: ${DB_PASSWORD}
+            # server environs
+            LETSENCRYPT_HOST: ${VIRTUAL_HOST:-local.muhit.me}
+            VIRTUAL_HOST    : ${VIRTUAL_HOST:-local.muhit.me}
+            VIRTUAL_PROTO   : ${VIRTUAL_PROTO:-http}
+            VIRTUAL_PORT    : ${VIRTUAL_PORT:-80}
 
-            WP_ENV: ${WP_ENV}
-            WP_HOME: ${WP_HOME}
-            WP_SITENAME: ${WP_SITENAME}
-            WP_ADMIN_USERNAME: ${WP_ADMIN_USERNAME}
-            WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD}
-            WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL}
+            # database environs
+            DB_HOST    : ${DB_HOST:-db.muhit.me}
+            DB_NAME    : ${DB_NAME:-wordpress}
+            DB_USER    : ${DB_USER:-maya-user}
+            DB_PASSWORD: ${DB_PASSWORD:-maya-pass}
 
-            WP_CLI_ALLOW_ROOT: true
+            # wordpress environs
+            WP_ENV : ${WP_ENV:-development}
+            WP_HOME: ${WP_HOME:-http://local.muhit.me}
+
+            WP_SITENAME      : ${WP_SITENAME:-Wordpress Blog}
+            WP_ADMIN_USERNAME: ${WP_ADMIN_USERNAME:-admin}
+            WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD:-super-secret}
+            WP_ADMIN_EMAIL   : ${WP_ADMIN_EMAIL:-admin@example.com}
+
+            WP_CLI_ALLOW_ROOT: ${WP_CLI_ALLOW_ROOT:-true}
+            WP_GENERATE_SALTS: ${WP_GENERATE_SALTS:-true}
         volumes:
             - backend:/var/www
             - db:/var/www/data/db
-            - client:/var/www/client
-
-    db:
-        container_name: db.muhit.me
-        image: mysql
-        restart: always
-        environment:
-            MYSQL_DATABASE: ${DB_NAME}
-            MYSQL_USER: ${DB_USER}
-            MYSQL_PASSWORD: ${DB_PASSWORD}
-            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-        volumes:
-            - db:/var/lib/mysql
 
     phpmyadmin:
-        container_name: phpmyadmin.muhit.me
+        container_name: pma.${CONTAINER_NAME:-muhit.me}
         image: phpmyadmin/phpmyadmin
         restart: always
         depends_on:
             - db
-        environment:
-            PMA_HOST: db
-            PMA_PORT: 3306
-            PMA_ARBITRARY: 1
-            UPLOAD_LIMIT: 1024M
         ports:
             - 8081:80
+        environment:
+            VIRTUAL_HOST : ${DB_HOST:-db.muhit.me}
+            PMA_HOST     : ${DB_HOST:-db.muhit.me}
+            PMA_PORT     : 3306
+            PMA_ARBITRARY: 1
+            UPLOAD_LIMIT : 1024M
 
 volumes:
     backend:
     client:
     db:
+
+networks:
+    default:
+        name: maya-server
+        external: false
